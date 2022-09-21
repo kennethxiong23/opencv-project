@@ -65,12 +65,15 @@ def findLargestContour(mask1, mask2, mask3):
                     maxMask = c
 
     #find the largest mask
-    if maxC in cnts1:
-        return mask1, maxC
-    if maxC in cnts2:
-        return mask2, maxC
-    else:
-        return mask3, maxC
+    try:
+        if maxC in cnts1:
+            return mask1, maxC
+        if maxC in cnts2:
+            return mask2, maxC
+        else:
+            return mask3, maxC
+    except ValueError:
+        return mask1
 
 def main():
     #check which input was used
@@ -82,15 +85,16 @@ def main():
         vid = cv.imread(args["image"])
 
     #hsv values for thresholding
-    cyanHSV_LB = np.array([75,50,0])
-    cyanHSV_UB = np.array([110,255,255])
+    orangeHSV_LB = np.array([5,50,0])
+    orangeHSV_UB = np.array([25,255,255])
 
-    yellowHSV_LB = np.array([10,50,0])
-    yellowHSV_UB = np.array([30,255,255])
+    greenHSV_LB = np.array([30,50,0])
+    greenHSV_UB = np.array([90,255,255])
 
-    magentaHSV_LB = np.array([150,50,0])
-    magentaHSV_UB = np.array([175,255,255])
+    purpleHSV_LB = np.array([120,50,0])
+    purpleHSV_UB = np.array([160,255,255])
 
+    oldPos = None
     # display video/webcam feed
     while True:
         #check if video needs to be flipped
@@ -104,23 +108,29 @@ def main():
                 frame = cv.flip(frame, 0)
 
         #get masks for each option/color
-        cyanMask = createMask(frame, cyanHSV_LB, cyanHSV_UB)
-        yellowMask = createMask(frame, yellowHSV_LB, yellowHSV_UB)
-        magentaMask = createMask(frame, magentaHSV_LB, magentaHSV_UB)
-        solutionMask = findLargestContour(cyanMask, yellowMask, magentaMask)
-        if solutionMask[1].size > 0:
+        orangeMask = createMask(frame, orangeHSV_LB, orangeHSV_UB)
+        greenMask = createMask(frame, greenHSV_LB, greenHSV_UB)
+        purpleMask = createMask(frame, purpleHSV_LB, purpleHSV_UB)
+        solutionMask = findLargestContour(orangeMask, greenMask, purpleMask)
+        if solutionMask[1].size > 0: #draw the bounding box
             (x,y,w,h) = cv.boundingRect(solutionMask[1])
             cv.rectangle(frame, (x, y), (x+w,y+h), (0,255,0), 2)
-
-        if np.array_equal(solutionMask[0], cyanMask):
-            print("pos 3")
-        elif np.array_equal(solutionMask[0], yellowMask):
-            print("pos 1")
+        cv.imshow('mask',solutionMask[0] )
+        #get which position it is in
+        if np.array_equal(solutionMask[0], orangeMask):
+            pos = 3
+        elif np.array_equal(solutionMask[0], greenMask):
+            pos = 1
         else:
-            print("pos2")
+            pos = 2
+
+        #only print if the pos changes
+        if oldPos != pos:
+            print("Position %s detected" %pos)
 
         cv.imshow("Image", frame)
         if cv.waitKey(1) == ord('q'):
             break
+        oldPos = pos
 
 main()
