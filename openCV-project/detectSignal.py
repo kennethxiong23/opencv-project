@@ -76,6 +76,7 @@ def findLargestContour(mask1, mask2, mask3):
         return mask1
 
 def main():
+    print("If input is not a image, press space twice to close the window")
     #check which input was used
     if args["camera"] != None:
         vid = cv.VideoCapture(int(args["camera"]))
@@ -85,7 +86,7 @@ def main():
         vid = cv.imread(args["image"])
 
     #hsv values for thresholding
-    orangeHSV_LB = np.array([5,50,0])
+    orangeHSV_LB = np.array([10,50,0])
     orangeHSV_UB = np.array([25,255,255])
 
     greenHSV_LB = np.array([30,50,0])
@@ -95,17 +96,15 @@ def main():
     purpleHSV_UB = np.array([160,255,255])
 
     oldPos = None
+    IS_VIDEO = True
     # display video/webcam feed
-    while True:
-        #check if video needs to be flipped
+    while IS_VIDEO:
+        #check if video needs to be flipped and if it is an image
         if args["image"] != None:
+            IS_VIDEO = False
             frame = vid
-            ret, frame = vid.read()
-            frame = cv.flip(frame, 0)
         else:
             ret, frame = vid.read()
-            if args["video"] != None:
-                frame = cv.flip(frame, 0)
 
         #get masks for each option/color
         orangeMask = createMask(frame, orangeHSV_LB, orangeHSV_UB)
@@ -129,8 +128,9 @@ def main():
             print("Position %s detected" %pos)
 
         cv.imshow("Image", frame)
-        if cv.waitKey(1) == ord('q'):
+        if cv.waitKey(1) == ord(' '):
             break
         oldPos = pos
 
+    cv.waitKey(0)
 main()
