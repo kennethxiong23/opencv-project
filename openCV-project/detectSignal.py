@@ -14,7 +14,7 @@ ap.add_argument("-v", "--video", required = False, default = None,
 ap.add_argument("-i", "--image", required = False, default = None,
                 help = "Path to image")
 ap.add_argument("-c", "--camera", required = False, default = None,
-                help = "integer representing the camera(if only one device, 0)")
+                help = "Integer representing the camera(if only one device, 0)")
 args = vars(ap.parse_args())
 
 def createMask(img, thresholdLB, thresholdUB):
